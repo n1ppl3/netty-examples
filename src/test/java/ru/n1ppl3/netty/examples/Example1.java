@@ -8,12 +8,15 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.CountDownLatch;
 
 
 class Example1 {
+    private static final Logger logger = LoggerFactory.getLogger(Example1.class);
 
     static InetSocketAddress cassandra = new InetSocketAddress("localhost", 9042);
 
@@ -27,20 +30,20 @@ class Example1 {
         bootstrap.handler(new ChannelInitializer<SocketChannel>() {
             @Override
             public void initChannel(SocketChannel ch) {
-
+                logger.info("INIT_CHANNEL: {}", ch);
             }
         });
 
         ChannelFuture channelFuture = bootstrap.connect(cassandra);
-        System.out.println(channelFuture);
+        logger.info("1. {}", channelFuture);
 
         CountDownLatch countDownLatch = new CountDownLatch(1);
 
         channelFuture.addListener(new ChannelFutureListener() {
             @Override
-            public void operationComplete(ChannelFuture channelFuture) throws Exception {
+            public void operationComplete(ChannelFuture channelFuture) {
                 if (channelFuture.isSuccess()) {
-                    System.out.println(channelFuture + " Successfully connected!");
+                    logger.info("{} Successfully connected!", channelFuture);
                 } else {
                     channelFuture.cause().printStackTrace();
                 }
@@ -49,6 +52,6 @@ class Example1 {
         });
 
         countDownLatch.await();
-        System.out.println(channelFuture);
+        logger.info("2. {}", channelFuture);
     }
 }
